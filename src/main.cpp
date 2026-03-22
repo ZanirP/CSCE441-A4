@@ -369,6 +369,61 @@ static void render()
 		MV->popMatrix();
 	}
 
+	// HUD stuff here?
+	auto PHUD = make_shared<MatrixStack>();
+	auto MVHUD = make_shared<MatrixStack>();
+
+	PHUD->pushMatrix();
+	MVHUD->pushMatrix();
+	float aspect = (float)width / (float)height;
+	PHUD->multMatrix(glm::perspective(45.0f * (float)M_PI / 180.0f, aspect, 0.1f, 100.0f));
+
+	MVHUD->translate(glm::vec3(0.0f, 0.0f, -2.0f));
+
+	glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, glm::value_ptr(PHUD->topMatrix()));
+
+	glUniform3fv(prog->getUniform("lightPos"), 1, glm::value_ptr(lightCam));
+	glUniform3fv(prog->getUniform("lightColor"), 1, glm::value_ptr(lightColor));
+	glUniform3fv(prog->getUniform("ka"), 1, glm::value_ptr(mat.ka));
+	glUniform3fv(prog->getUniform("ks"), 1, glm::value_ptr(mat.ks));
+	glUniform1f(prog->getUniform("s"), mat.s);
+
+	MVHUD->pushMatrix();
+	MVHUD->translate(glm::vec3(-0.85f, 0.5f, 0.0f));
+	MVHUD->rotate((float)t, glm::vec3(0.0f, 1.0f, 0.0f));
+	MVHUD->scale(glm::vec3(0.2f));
+	MVHUD->translate(glm::vec3(0.0f, -shape->getMinY(), 0.0f));
+
+	glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MVHUD->topMatrix()));
+	glm::mat3 normalMatrixHUD1 = glm::transpose(glm::inverse(glm::mat3(MVHUD->topMatrix())));
+	glUniformMatrix3fv(prog->getUniform("normalMatrix"), 1, GL_FALSE, glm::value_ptr(normalMatrixHUD1));
+
+	glm::vec3 hudColor1(0.6f, 0.6f, 0.6f);
+	glUniform3fv(prog->getUniform("kd"), 1, glm::value_ptr(hudColor1));
+
+	shape->draw(prog);
+	MVHUD->popMatrix();
+
+	MVHUD->pushMatrix();
+	MVHUD->translate(glm::vec3(0.9f, 0.5f, 0.0f));
+	MVHUD->rotate((float)t, glm::vec3(0.0f, 1.0f, 0.0f));
+	MVHUD->scale(glm::vec3(0.2f));
+	MVHUD->translate(glm::vec3(0.0f, -teapot->getMinY(), 0.0f));
+
+	glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MVHUD->topMatrix()));
+	glm::mat3 normalMatrixHUD2 = glm::transpose(glm::inverse(glm::mat3(MVHUD->topMatrix())));
+	glUniformMatrix3fv(prog->getUniform("normalMatrix"), 1, GL_FALSE, glm::value_ptr(normalMatrixHUD2));
+
+	glm::vec3 hudColor2(0.6f, 0.6f, 0.6f);
+	glUniform3fv(prog->getUniform("kd"), 1, glm::value_ptr(hudColor2));
+
+	teapot->draw(prog);
+	MVHUD->popMatrix();
+
+
+	MVHUD->popMatrix();
+	PHUD->popMatrix();
+
 
 	prog->unbind();
 	
