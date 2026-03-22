@@ -64,35 +64,23 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
-	if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-		progIndex = (progIndex + 1) % progs.size();
+	if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+		camera->moveForward(0.05f);
 	}
-	if (key == GLFW_KEY_S && action == GLFW_PRESS && (mods & GLFW_MOD_SHIFT) != 0) {
-		progIndex = (progIndex - 1 + progs.size()) % progs.size();
+	if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		camera->moveForward(-0.05f);
 	}
-	if (key == GLFW_KEY_M && action == GLFW_PRESS) {
-		materialIndex = (materialIndex + 1) % materials.size();
+	if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+		camera->moveRight(-0.05f);
 	}
-	if (key == GLFW_KEY_M && action == GLFW_PRESS && (mods & GLFW_MOD_SHIFT) != 0) {
-		materialIndex = (materialIndex - 1 + materials.size()) % materials.size();
+	if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		camera->moveRight(0.05f);
 	}
-	if (key == GLFW_KEY_L && action == GLFW_PRESS) {
-		lightIndex = (lightIndex + 1) % lights.size();
+	if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
+		camera->zoom(-0.01f);
 	}
-	if (key == GLFW_KEY_L && action == GLFW_PRESS && (mods & GLFW_MOD_SHIFT) != 0) {
-		lightIndex = (lightIndex - 1 + lights.size()) % lights.size();
-	}
-	if (key == GLFW_KEY_X && action == GLFW_PRESS) {
-		lights[lightIndex].position.x += 0.1f;
-	}
-	if (key == GLFW_KEY_X && action == GLFW_PRESS && (mods & GLFW_MOD_SHIFT) != 0) {
-		lights[lightIndex].position.x -= 0.1f;
-	}
-	if (key == GLFW_KEY_Y && action == GLFW_PRESS) {
-		lights[lightIndex].position.y += 0.1f;
-	}
-	if (key == GLFW_KEY_Y && action == GLFW_PRESS && (mods & GLFW_MOD_SHIFT) != 0) {
-		lights[lightIndex].position.y -= 0.1f;
+	if(glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+		camera->zoom(0.01f);
 	}
 }
 
@@ -200,7 +188,6 @@ static void init()
 	groundShape->init();
 
     camera = make_shared<Camera>();
-    camera->setInitDistance(2.0f);
 
     Materials mat;
     mat.ka = glm::vec3(0.2f);
@@ -249,6 +236,8 @@ static void init()
                 0.0f);
 
             obj.scl = glm::vec3(0.25f);
+			float timeScale = 0.75f + 0.25f * sin((float)t + obj.pos.x + obj.pos.z);
+			glm::vec3 animatedScale = obj.scl * timeScale;
             obj.shear = glm::mat4(1.0f);
             obj.color = glm::vec3(
                 rand() / (float)RAND_MAX,
@@ -366,7 +355,7 @@ static void render()
 		MV->rotate(obj.rot.y, glm::vec3(0,1,0));
 		MV->rotate(obj.rot.z, glm::vec3(0,0,1));
 		MV->multMatrix(obj.shear);
-		MV->scale(obj.scl);
+		MV->scale(animatedScale);
 
 		MV->translate(glm::vec3(0.0f, -obj.minY, 0.0f));
 
