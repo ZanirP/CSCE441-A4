@@ -152,6 +152,8 @@ static void init()
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
 
+	float t = glfwGetTime();
+
     phongProg = make_shared<Program>();
     phongProg->setShaderNames(RESOURCE_DIR + "phong_vert.glsl",
                               RESOURCE_DIR + "phong_frag.glsl");
@@ -236,8 +238,6 @@ static void init()
                 0.0f);
 
             obj.scl = glm::vec3(0.25f);
-			float timeScale = 0.75f + 0.25f * sin((float)t + obj.pos.x + obj.pos.z);
-			glm::vec3 animatedScale = obj.scl * timeScale;
             obj.shear = glm::mat4(1.0f);
             obj.color = glm::vec3(
                 rand() / (float)RAND_MAX,
@@ -274,10 +274,6 @@ static void render()
 	camera->setAspect((float)width/(float)height);
 	
 	double t = glfwGetTime();
-	if(!keyToggles[(unsigned)' ']) {
-		// Spacebar turns animation on/off
-		t = 0.0f;
-	}
 	
 	// Matrix stacks
 	auto P = make_shared<MatrixStack>();
@@ -349,6 +345,9 @@ static void render()
 
 	for(const auto &obj : sceneObjects) {
 		MV->pushMatrix();
+
+		float timeScale = 1.5f + 0.25f * sin((float)t + obj.pos.x + obj.pos.z);
+		glm::vec3 animatedScale = obj.scl * timeScale;
 
 		MV->translate(glm::vec3(obj.pos.x, obj.pos.y, obj.pos.z));
 		MV->rotate(obj.rot.x, glm::vec3(1,0,0));
